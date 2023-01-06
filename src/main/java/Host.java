@@ -3,37 +3,59 @@ import org.jspace.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.URI;
-import java.net.URISyntaxException;
+import java.net.*;
+import java.rmi.Remote;
+import java.util.Enumeration;
 
 public class Host {
-    String name;
-    String uri, spaceName;
-    SpaceRepository repository;
-    SequentialSpace sequentialSpace;
-    RemoteSpace chat;
 
-    public Host(String name, String uri, String spaceName) throws URISyntaxException, InterruptedException, IOException {
-        // Open a gate
-        this.name = name;
-        this.uri = uri;
-        this.spaceName = spaceName;
-        this.sequentialSpace = new SequentialSpace();
-        repository = new SpaceRepository();
-        URI myUri = new URI(uri);
-        String gateUri = "tcp://" + myUri.getHost() + ":" + myUri.getPort() +  "?keep" ;
-        System.out.println("Opening repository gate at " + gateUri + "...");
-        //repository.addGate(gateUri);
-        repository.add(spaceName, sequentialSpace);
+    SpaceRepository repository = new SpaceRepository();
+    SequentialSpace mySpace = new SequentialSpace();
+    RemoteSpace lobbySpace;
+    URI myUri;
+    String mySpaceName;
+    String hostName;
 
-        this.name = name;
+    public Host(String hostName, String uri, String spaceName) throws URISyntaxException, InterruptedException, IOException {
+
+        // Initialising variables
+        this.myUri = new URI(uri);
+        this.hostName = hostName;
+        this.mySpaceName = spaceName;
+
+        // Open a gate, so people can join your own network
+        openGate();
+
+        // Connecting to global lobby space
+        connectToLobby();
+    }
+
+    private void connectToLobby() throws IOException, InterruptedException {
         String lobbyUri = "tcp://127.0.0.1:9001/Lobby?keep";
-        System.out.println("Connecting to chat space " + uri + "...");
-        chat = new RemoteSpace(lobbyUri);
+        System.out.println("Connecting to Lobby space at: " + lobbyUri + "...");
+        lobbySpace = new RemoteSpace(lobbyUri);
+        lobbySpace.put(myUri.getHost() + ":" + myUri.getPort(), mySpaceName, hostName);
+        lobbySpace.put(hostName);
+    }
 
-        chat.get(new ActualField("lock"));
-        chat.put(myUri.getHost() + ":" + myUri.getPort(), spaceName,name);
-        chat.put(name,0);
-        chat.put("lock");
+    private void openGate() throws URISyntaxException {
+        String gateUri = "tcp://" + myUri.getHost() + ":" + myUri.getPort() + "/?keep";
+        System.out.println("Opening host repository gate at: " + gateUri + "...");
+        repository.addGate(gateUri);
+        repository.add(mySpaceName, mySpace);
+    }
+
+    private String getIpAddress() throws SocketException {
+        String ip = "";
+        Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
+        while (interfaces.hasMoreElements()) {
+            NetworkInterface iface = interfaces.nextElement();
+            // filters out 127.0.0.1 and inactive interfaces
+            if (iface.isLoopback() || !iface.isUp()) continue;
+            Enumeration<InetAddress> addresses = iface.getInetAddresses();
+            InetAddress address = addresses.nextElement();
+            ip = address.getHostAddress();
+            System.out.println(iface.getDisplayName() + " " + ip);
+        } return ip;
     }
 }
