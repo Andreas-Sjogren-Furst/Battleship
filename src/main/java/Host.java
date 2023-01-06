@@ -31,7 +31,7 @@ public class Host {
     }
 
     private void connectToLobby() throws IOException, InterruptedException {
-        String lobbyUri = "tcp://127.0.0.1:9001/Lobby?keep";
+        String lobbyUri = "tcp://127.0.0.1:9001/lobby?keep";
         System.out.println("Connecting to Lobby space at: " + lobbyUri + "...");
         lobbySpace = new RemoteSpace(lobbyUri);
         lobbySpace.put(myUri.getHost() + ":" + myUri.getPort(), mySpaceName, hostName);
@@ -43,6 +43,7 @@ public class Host {
         System.out.println("Opening host repository gate at: " + gateUri + "...");
         repository.addGate(gateUri);
         repository.add(mySpaceName, mySpace);
+
     }
 
     private String getIpAddress() throws SocketException {

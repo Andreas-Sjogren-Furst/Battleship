@@ -8,7 +8,7 @@ import java.net.URISyntaxException;
 import java.util.List;
 
 public abstract class Lobby {
-    public static final String spaceName = "Lobby";
+    public static final String spaceName = "lobby";
     public static URI myUri;
 
     private static final String uri = "tcp://127.0.0.1:9001/?keep";

@@ -1,9 +1,10 @@
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 public class Board {
     char[][] board;
-    char[] alphabet = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'};
+    String[] alphabet = {"A", "B", "C", "D", "E", "F", "G", "H", "I", "J"};
     ArrayList<Character> alphabetList = new ArrayList(List.of(alphabet));
     public Board(int length){
         this.board = new char[length][length];
@@ -14,9 +15,8 @@ public class Board {
         }
     }
     public boolean isValidAttack(Board opponent, String attack){
-        int x = alphabetList.indexOf(attack.toCharArray()[0]);
-        int y = attack.toCharArray()[1];
-
+        int x = alphabetList.indexOf(attack.split("")[0]);
+        int y = Integer.parseInt(attack.split("")[1]);
         if(opponent.board[x][y] == '-' || opponent.board[x][y] == ' ') return true;
         else return false;
     }
@@ -33,6 +33,106 @@ public class Board {
         }
     }
 
+    public boolean validPlacement(String coordinate1, String coordinate2, int lengthShip){
+
+        // x and y for positions for coordinate 1
+        int x1 = alphabetList.indexOf(coordinate1.split("")[0]);
+        int y1 = Integer.parseInt(coordinate1.split("")[1]);
+
+        // x and y positions for coordinate 2
+        int x2 = alphabetList.indexOf(coordinate2.split("")[0]);
+        int y2 = Integer.parseInt(coordinate2.split("")[1]);
+
+
+        // Is coordinates outside the board
+        if((x1 >= board.length) || (x2 >= board.length) || (y1 >= board.length) ||(y2 >= board.length)) return false;
+        else if (x1 < 0 || x2 < 0 || y1 < 0 || y2 < 0) return false;
+
+        // Check if ship is already placed on that position
+        if(x1 == x2){
+            if (Math.abs(y2-y1) != lengthShip - 1) return false;
+            if(y2 > y1){
+                for(int i = y1; i <= y2; i++){
+                    if(board[i][x1] == '-') return false;
+                }
+            } else {
+                for(int i = y2; i <= y1; i++){
+                    if(board[i][x1] == '-') return false;
+                }
+            }
+        } else if (y1 == y2){
+            if (Math.abs(x2-x1) != lengthShip - 1) return false;
+            if(x2 > x1){
+                for(int i = x1; i <= x2; i++){
+                    if(board[y1][i] == '-') return false;
+                }
+            }
+        } else {
+            for(int i = x2; i <= x1; i++){
+                if(board[y1][i] == '-') return false;
+            }
+        }
+        return true;
+    }
+
+    public boolean placeAllShips() {
+        draw();
+        Scanner scanner = new Scanner(System.in);
+        //int[] ships = {2,3,3,4,5};
+        int[] ships = {2};
+        System.out.println("## Are you ready to place ships? ##");
+        System.out.println(" -When placing your ships, write the two end coordinates of the ship");
+        int index = 0;
+        String[] input = new String[2];
+        while(index < ships.length){
+            System.out.println("Place ship with size: " + ships[index]);
+            System.out.print("Enter coordinate for front of the ship: ");
+            input[0] = scanner.next();
+            System.out.print("Enter the coordinate for end of the ship: ");
+            input[1] = scanner.next();
+            System.out.println();
+            if(validPlacement(input[0],input[1],ships[index])){
+                placeShip(input[0],input[1],ships[index]);
+                index++;
+            } else {
+                System.out.println("The ship placement is not valid, please try again !");
+            } draw();
+        }
+        return true;
+    }
+
+    public void placeShip(String coordinate1, String coordinate2, int lengthShip){
+        // x and y for positions for coordinate 1
+        int x1 = alphabetList.indexOf(coordinate1.split("")[0]);
+        int y1 = Integer.parseInt(coordinate1.split("")[1]);
+
+        // x and y positions for coordinate 2
+        int x2 = alphabetList.indexOf(coordinate2.split("")[0]);
+        int y2 = Integer.parseInt(coordinate2.split("")[1]);
+
+        if(x1 == x2){
+            if(y2 > y1){
+                for(int i = y1; i <= y2; i++){
+                    board[i][x1] = '-';
+                }
+            } else {
+                for(int i = y2; i <= y1; i++){
+                    board[i][x1] = '-';
+                }
+            }
+        } else {
+            if(x2 > x1){
+                for(int i = x1; i <= x2; i++){
+                    board[y1][i] = '-';
+                }
+            } else {
+                for(int i = x2; i <= x1; i++){
+                    board[y1][i] = '-';
+                }
+            }
+        }
+    }
+
     public void draw() {
         for (int i = 0; i < board.length; i++){
             System.out.print(i + " ");
@@ -44,6 +144,6 @@ public class Board {
         } System.out.print("   ");
         for(int i = 0; i < board.length; i++){
             System.out.print(alphabet[i] + " ");
-        }
+        } System.out.println();
     }
 }

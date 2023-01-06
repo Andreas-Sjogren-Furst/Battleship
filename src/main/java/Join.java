@@ -12,8 +12,9 @@ public class Join {
     Join(String name) throws IOException {
         // Connect to the remote chat space
         this.name = name;
-        String uri = "tcp://127.0.0.1:9001/Lobby?keep";
-        System.out.println("Connecting to Lobby space at: " + uri + "...");
+
+        String uri = "tcp://127.0.0.1:9001/lobby?keep";
+        System.out.println("Connecting to lobby space at: " + uri + "...");
         chatSpace = new RemoteSpace(uri);
     };
 

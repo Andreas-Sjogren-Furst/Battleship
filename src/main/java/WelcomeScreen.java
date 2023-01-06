@@ -17,7 +17,6 @@ public abstract class WelcomeScreen {
     public static String getName(){
         Scanner scanner = new Scanner(System.in);
         System.out.print("Please enter your name: ");
-        String name = scanner.next();
-        return name;
+        return scanner.next().toLowerCase();
     }
 }
