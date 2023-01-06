@@ -26,13 +26,14 @@ public class Player {
             } int input = scanner.nextInt();
             Object[] t = Lobby.lobbySpace.get(new FormalField(String.class), new FormalField(String.class),new ActualField(input));
             RemoteSpace chat = player.connect(t[0].toString(),t[1].toString());
-
-            chat.put("Hello");
+            Chat.runChat(chat, name);
 
         } else {
             String uri = "tcp://127.0.0.1:9001/?keep";
             String spaceName = "oscarSpace";
-            Host player = new Host(name,uri,spaceName);
+            Host host = new Host(name,uri,spaceName);
+
+            Chat.runChat(host.chat, name);
         }
     }
 }
