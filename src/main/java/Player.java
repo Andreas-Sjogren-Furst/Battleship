@@ -39,7 +39,7 @@ public class Player {
             defenseBoard.placeAllShips();
             for(int i = 0; i < defenseBoard.board.length; i++){
                 for(int j = 0; j < defenseBoard.board.length; j++){
-                    if(defenseBoard.board[j][i] == '-'){
+                    if(defenseBoard.board[i][j] == '-'){
                         join.myBoard.put(defenseBoard.alphabetList.get(j).toString() + i,"join");
                     }
                 }
@@ -64,13 +64,15 @@ public class Player {
                 try{
                     while(true){
                         join.mySpace.get(new ActualField("p2"));
-                        Object[] messageFromChat = join.mySpace.get(new FormalField(String.class), new ActualField(2), new ActualField(1));
+                        Object[] messageFromHost = join.mySpace.get(new FormalField(String.class),new ActualField(2), new ActualField(2));
+                        defenseBoard.updateDefense(defenseBoard,messageFromHost[0].toString());
+
+                        Object[] messageFromChat = join.mySpace.get(new FormalField(String.class), new ActualField(1), new ActualField(1));
                         if(join.myBoard.getp(new ActualField(messageFromChat[0]),new ActualField("host")) != null) {
                             attackBoard.updateAttack(attackBoard, messageFromChat[0].toString(), true);
                         } else attackBoard.updateAttack(attackBoard,messageFromChat[0].toString(),false);
                         join.mySpace.put("p1");
-                        Object[] messageFromHost = join.mySpace.get(new FormalField(String.class),new ActualField(1), new ActualField(2));
-                        defenseBoard.updateDefense(defenseBoard,messageFromHost[0].toString());
+
                     }
                 } catch (InterruptedException e) {
                     e.printStackTrace();
@@ -90,7 +92,7 @@ public class Player {
             defenseBoard.placeAllShips();
             for(int i = 0; i < defenseBoard.board.length; i++){
                 for(int j = 0; j < defenseBoard.board.length; j++){
-                    if(defenseBoard.board[j][i] == '-'){
+                    if(defenseBoard.board[i][j] == '-'){
                         host.myBoard.put(defenseBoard.alphabetList.get(j).toString() + i,"host");
                     }
                 }
@@ -115,12 +117,12 @@ public class Player {
                 try {
                     while(true){
                         host.mySpace.get(new ActualField("p1"));
-                        Object[] messageFromChat = host.mySpace.get(new FormalField(String.class), new ActualField(1), new ActualField(2));
+                        Object[] messageFromChat = host.mySpace.get(new FormalField(String.class), new ActualField(2), new ActualField(2));
                         if(host.myBoard.getp(new ActualField(messageFromChat[0]),new ActualField("join")) != null){
                             attackBoard.updateAttack(attackBoard,messageFromChat[0].toString(),true);
                         } else attackBoard.updateAttack(attackBoard,messageFromChat[0].toString(),false);
                         host.mySpace.put("p2");
-                        Object[] messageFromJoin = host.mySpace.get(new FormalField(String.class),new ActualField(2), new ActualField(1));
+                        Object[] messageFromJoin = host.mySpace.get(new FormalField(String.class),new ActualField(1), new ActualField(1));
                         defenseBoard.updateDefense(defenseBoard,messageFromJoin[0].toString());
                     }
                 } catch (InterruptedException e) {

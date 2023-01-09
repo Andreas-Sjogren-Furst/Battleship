@@ -37,7 +37,8 @@ public abstract class Chat {
             if (message.equals("draw")) {
                 chat.put("draw", 2);
             } else if (attackBoard.isValidAttack(attackBoard, message)) {
-                chat.put(message, 2, 1); // Join attacks Host
+                chat.put(message, 1, 1);
+                chat.put(message, 1, 1);// Join attacks Host
             } else chat.put(name, message);
         }
     }
@@ -68,7 +69,8 @@ public abstract class Chat {
             if (message.equals("draw")) {
                 chat.put("draw", 1);
             } else if(attackBoard.isValidAttack(attackBoard,message)){
-                chat.put(message,1,2); // Host attacks Join
+                chat.put(message,2,2);
+                chat.put(message,2,2);// Host attacks Join
             } else chat.put(name, message);
         }
     }
