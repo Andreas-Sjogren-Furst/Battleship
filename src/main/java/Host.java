@@ -11,6 +11,7 @@ public class Host {
 
     SpaceRepository repository = new SpaceRepository();
     SequentialSpace mySpace = new SequentialSpace();
+    SequentialSpace myBoard = new SequentialSpace();
     RemoteSpace lobbySpace;
     URI myUri;
     String mySpaceName;
@@ -38,12 +39,13 @@ public class Host {
         lobbySpace.put(hostName);
     }
 
-    private void openGate() throws URISyntaxException {
+    private void openGate() throws URISyntaxException, InterruptedException {
         String gateUri = "tcp://" + myUri.getHost() + ":" + myUri.getPort() + "/?keep";
         System.out.println("Opening host repository gate at: " + gateUri + "...");
         repository.addGate(gateUri);
         repository.add(mySpaceName, mySpace);
-
+        repository.add("board", myBoard);
+        mySpace.put("p1");
     }
 
     private String getIpAddress() throws SocketException {

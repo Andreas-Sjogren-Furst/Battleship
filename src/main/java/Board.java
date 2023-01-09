@@ -5,7 +5,9 @@ import java.util.Scanner;
 public class Board {
     char[][] board;
     String[] alphabet = {"A", "B", "C", "D", "E", "F", "G", "H", "I", "J"};
-    ArrayList<Character> alphabetList = new ArrayList(List.of(alphabet));
+    String[] integers = {"0","1","2","3","4","5","6","7","8","9"};
+    ArrayList<String> alphabetList = new ArrayList(List.of(alphabet));
+    ArrayList<String> integersList = new ArrayList(List.of(integers));
     public Board(int length){
         this.board = new char[length][length];
         for(int i = 0; i < length; i++){
@@ -15,21 +17,38 @@ public class Board {
         }
     }
     public boolean isValidAttack(Board opponent, String attack){
+        if(attack.length() != 2) return false;
+
         int x = alphabetList.indexOf(attack.split("")[0]);
-        int y = Integer.parseInt(attack.split("")[1]);
-        if(opponent.board[x][y] == '-' || opponent.board[x][y] == ' ') return true;
+        int y = integersList.indexOf(attack.split("")[1]);
+
+        if(x == -1 || y == -1) return false;
+
+        if(opponent.board[y][x] == '-' || opponent.board[y][x] == ' ') return true;
         else return false;
     }
 
-    public void update(Board opponent, String attack){
-        int x = alphabetList.indexOf(attack.toCharArray()[0]);
-        int y = attack.toCharArray()[1];
-        if(opponent.board[x][y] == '-'){
-            opponent.board[x][y] = 'X';
-            board[x][y] = 'X';
+    public void updateDefense(Board opponent, String attack){
+        int x = alphabetList.indexOf(attack.split("")[0]);
+        int y = integersList.indexOf(attack.split("")[1]);
+        if(opponent.board[y][x] == '-'){
+            opponent.board[y][x] = 'X';
+            board[y][x] = 'X';
         } else {
-            opponent.board[x][y] = 'O';
-            board[x][y] = 'O';
+            opponent.board[y][x] = 'O';
+            board[y][x] = 'O';
+        }
+    }
+
+    public void updateAttack(Board opponent, String attack, boolean hit){
+        int x = alphabetList.indexOf(attack.split("")[0]);
+        int y = integersList.indexOf(attack.split("")[1]);
+        if(hit){
+            opponent.board[y][x] = 'X';
+            board[y][x] = 'X';
+        } else {
+            opponent.board[y][x] = 'O';
+            board[y][x] = 'O';
         }
     }
 
@@ -145,5 +164,23 @@ public class Board {
         for(int i = 0; i < board.length; i++){
             System.out.print(alphabet[i] + " ");
         } System.out.println();
+    }
+
+    public boolean shoot(String attack, Board attackBoard, Board defenseBoard){
+        int coordinate1 = alphabetList.indexOf(attack.split("")[0]);
+        int coordinate2 = Integer.parseInt(attack.split("")[1]);
+
+        if(coordinate1 == -1 || coordinate2 > 9 || coordinate2 < 0) return false;
+
+        if(isValidAttack(attackBoard, attack)){
+            if(attackBoard.board[coordinate1][coordinate2] == '-') {
+                attackBoard.board[coordinate1][coordinate2] = 'X';
+                defenseBoard.board[coordinate1][coordinate2] = 'X';
+            } else {
+                attackBoard.board[coordinate1][coordinate2] = 'O';
+                defenseBoard.board[coordinate1][coordinate2] = 'O';
+            }
+            return true;
+        } else return false;
     }
 }

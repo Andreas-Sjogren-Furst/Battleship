@@ -14,6 +14,13 @@ public abstract class WelcomeScreen {
         }
     }
 
+    public static void battle(){
+        System.out.println("Both players have placed their ships, let the battle begin !");
+        System.out.println("To shoot write the coordinate of the square");
+        System.out.println("To see the boards write: update");
+        System.out.println("Host will begin shooting"); // Todo make it random
+    }
+
     public static String getName(){
         Scanner scanner = new Scanner(System.in);
         System.out.print("Please enter your name: ");

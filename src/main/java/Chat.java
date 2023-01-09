@@ -11,11 +11,13 @@ import java.util.Scanner;
 
 public abstract class Chat {
 
-    public static void connectToChat(RemoteSpace chat, String name) throws IOException, InterruptedException {
+    public static void connectToChat(RemoteSpace chat, String name, Board attackBoard) throws IOException, InterruptedException {
         chat.query(new ActualField("lockJoin"));
         chat.query(new ActualField("lockHost"));
         BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
-
+        while (input.ready()) {
+            input.readLine();
+        } WelcomeScreen.battle();
 
         new Thread(() -> {
             while (true) {
@@ -32,14 +34,21 @@ public abstract class Chat {
 
         while (true) {
             String message = input.readLine();
-            chat.put(name, message);
+            if (message.equals("draw")) {
+                chat.put("draw", 2);
+            } else if (attackBoard.isValidAttack(attackBoard, message)) {
+                chat.put(message, 2, 1); // Join attacks Host
+            } else chat.put(name, message);
         }
     }
 
-    public static void createChat(SequentialSpace chat, String name) throws IOException, InterruptedException {
+    public static void createChat(SequentialSpace chat, String name, Board attackBoard) throws IOException, InterruptedException {
         chat.query(new ActualField("lockHost"));
         chat.query(new ActualField("lockJoin"));
         BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
+        while (input.ready()) {
+            input.readLine();
+        } WelcomeScreen.battle();
 
         new Thread(() -> {
             while (true) {
@@ -56,7 +65,11 @@ public abstract class Chat {
 
         while (true) {
             String message = input.readLine();
-            chat.put(name, message);
+            if (message.equals("draw")) {
+                chat.put("draw", 1);
+            } else if(attackBoard.isValidAttack(attackBoard,message)){
+                chat.put(message,1,2); // Host attacks Join
+            } else chat.put(name, message);
         }
     }
 }
