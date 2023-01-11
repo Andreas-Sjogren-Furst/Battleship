@@ -1,7 +1,4 @@
-import org.jspace.ActualField;
-import org.jspace.FormalField;
-import org.jspace.RemoteSpace;
-import org.jspace.SequentialSpace;
+import org.jspace.*;
 
 import java.io.BufferedReader;
 import java.io.DataInputStream;
@@ -11,52 +8,21 @@ import java.util.Scanner;
 
 public abstract class Chat {
 
-    public static void connectToChat(RemoteSpace chat, String name, Board attackBoard) throws IOException, InterruptedException {
-        chat.query(new ActualField("lockJoin"));
-        chat.query(new ActualField("lockHost"));
+    public static void startChat(Space chatSpace, Space boardSpace, String name, Board attackBoard, int playerId) throws IOException, InterruptedException {
+        chatSpace.query(new ActualField("lockHost"));
+        chatSpace.query(new ActualField("lockJoin"));
+        WelcomeScreen.battle();
         BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
         while (input.ready()) {
             input.readLine();
-        } WelcomeScreen.battle();
-
-        new Thread(() -> {
-            while (true) {
-                try {
-                    Object[] message = chat.query(new FormalField(String.class), new FormalField(String.class));
-                    if (!(message[0]).equals(name)) {
-                        chat.get(new FormalField(String.class), new FormalField(String.class));
-                        System.out.println(message[0] + ": " + message[1]);
-                    }
-                } catch (InterruptedException e) {
-                }
-            }
-        }).start();
-
-        while (true) {
-            String message = input.readLine();
-            if (message.equals("draw")) {
-                chat.put("draw", 2);
-            } else if (attackBoard.isValidAttack(attackBoard, message)) {
-                chat.put(message, 1, 1);
-                chat.put(message, 1, 1);// Join attacks Host
-            } else chat.put(name, message);
         }
-    }
-
-    public static void createChat(SequentialSpace chat, String name, Board attackBoard) throws IOException, InterruptedException {
-        chat.query(new ActualField("lockHost"));
-        chat.query(new ActualField("lockJoin"));
-        BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
-        while (input.ready()) {
-            input.readLine();
-        } WelcomeScreen.battle();
 
         new Thread(() -> {
             while (true) {
                 try {
-                    Object[] message = chat.query(new FormalField(String.class), new FormalField(String.class));
+                    Object[] message = chatSpace.query(new FormalField(String.class), new FormalField(String.class));
                     if (!(message[0]).equals(name)) {
-                        chat.get(new FormalField(String.class), new FormalField(String.class));
+                        chatSpace.get(new FormalField(String.class), new FormalField(String.class));
                         System.out.println(message[0] + ": " + message[1]);
                     }
                 } catch (InterruptedException e) {
@@ -66,12 +32,16 @@ public abstract class Chat {
 
         while (true) {
             String message = input.readLine();
-            if (message.equals("draw")) {
-                chat.put("draw", 1);
-            } else if(attackBoard.isValidAttack(attackBoard,message)){
-                chat.put(message,2,2);
-                chat.put(message,2,2);// Host attacks Join
-            } else chat.put(name, message);
+            if(message.equals("leave")) {
+                boardSpace.put("leave", name);
+            }
+            else if (message.equals("draw")) {
+                chatSpace.put("draw", playerId);
+            } else if(attackBoard.isValidAttack(message) && !Player.gameOver){
+                // Host attacks Join
+                chatSpace.put(message,playerId,playerId);
+                chatSpace.put(message,playerId,playerId);
+            } else chatSpace.put(name, message);
         }
     }
 }

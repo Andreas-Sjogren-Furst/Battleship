@@ -1,67 +1,64 @@
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
 public class Board {
+    int boardSize = 10;
     char[][] board;
     String[] alphabet = {"A", "B", "C", "D", "E", "F", "G", "H", "I", "J"};
     String[] integers = {"0","1","2","3","4","5","6","7","8","9"};
     ArrayList<String> alphabetList = new ArrayList(List.of(alphabet));
     ArrayList<String> integersList = new ArrayList(List.of(integers));
-    public Board(int length){
-        this.board = new char[length][length];
-        for(int i = 0; i < length; i++){
-            for(int j = 0; j < length; j++){
+    public Board(){
+        this.board = new char[boardSize][boardSize];
+        for(int i = 0; i < boardSize; i++){
+            for(int j = 0; j < boardSize; j++){
                 board[i][j] = ' ';
             }
         }
     }
-    public boolean isValidAttack(Board opponent, String attack){
-        if(attack.length() != 2) return false;
 
+    public boolean isValidAttack(String attack){
+        if(attack.length() != 2) return false;
         int x = alphabetList.indexOf(attack.split("")[0]);
         int y = integersList.indexOf(attack.split("")[1]);
-
         if(x == -1 || y == -1) return false;
-
-        if(opponent.board[y][x] == '-' || opponent.board[y][x] == ' ') return true;
+        else if(board[y][x] == '-' || board[y][x] == ' ') return true;
         else return false;
     }
 
-    public void updateDefense(Board opponent, String attack){
+    public void updateDefense(String attack){
         int x = alphabetList.indexOf(attack.split("")[0]);
         int y = integersList.indexOf(attack.split("")[1]);
-        if(opponent.board[y][x] == '-'){
-            opponent.board[y][x] = 'X';
-            board[y][x] = 'X';
-        } else {
-            opponent.board[y][x] = 'O';
-            board[y][x] = 'O';
-        }
+        if(board[y][x] == '-') board[y][x] = 'X';
+        else board[y][x] = 'O';
     }
 
-    public void updateAttack(Board opponent, String attack, boolean hit){
+    public void updateAttack(String attack, boolean hit){
         int x = alphabetList.indexOf(attack.split("")[0]);
         int y = integersList.indexOf(attack.split("")[1]);
-        if(hit){
-            opponent.board[y][x] = 'X';
-            board[y][x] = 'X';
-        } else {
-            opponent.board[y][x] = 'O';
-            board[y][x] = 'O';
-        }
+        if(hit) board[y][x] = 'X';
+        else board[y][x] = 'O';
     }
 
     public boolean validPlacement(String coordinate1, String coordinate2, int lengthShip){
 
+        // checks length of coordinates
+        if(coordinate1.length() != 2 || coordinate2.length() != 2) return false;
+
         // x and y for positions for coordinate 1
         int x1 = alphabetList.indexOf(coordinate1.split("")[0]);
-        int y1 = Integer.parseInt(coordinate1.split("")[1]);
+        int y1 = integersList.indexOf(coordinate1.split("")[1]);
 
         // x and y positions for coordinate 2
         int x2 = alphabetList.indexOf(coordinate2.split("")[0]);
-        int y2 = Integer.parseInt(coordinate2.split("")[1]);
+        int y2 = integersList.indexOf(coordinate2.split("")[1]);
 
+        // checks if valid coordinate
+        if(x1 == -1 || y1 == -1 || x2 == -1 || y2 == -1) return false;
 
         // Is coordinates outside the board
         if((x1 >= board.length) || (x2 >= board.length) || (y1 >= board.length) ||(y2 >= board.length)) return false;
@@ -94,28 +91,31 @@ public class Board {
         return true;
     }
 
-    public boolean placeAllShips() {
-        draw();
-        Scanner scanner = new Scanner(System.in);
+    public boolean placeAllShips(Board attackBoard, Board defenseBoard) throws IOException {
+        draw(attackBoard,defenseBoard);
+        BufferedReader scanner = new BufferedReader(new InputStreamReader(System.in));
+        while (scanner.ready()) {
+            scanner.readLine();
+        }
         //int[] ships = {2,3,3,4,5};
         int[] ships = {2};
         System.out.println("## Are you ready to place ships? ##");
-        System.out.println(" -When placing your ships, write the two end coordinates of the ship");
+        System.out.println(" --- When placing your ships, write the two end coordinates of the ship ---");
         int index = 0;
         String[] input = new String[2];
         while(index < ships.length){
             System.out.println("Place ship with size: " + ships[index]);
             System.out.print("Enter coordinate for front of the ship: ");
-            input[0] = scanner.next();
+            input[0] = scanner.readLine();
             System.out.print("Enter the coordinate for end of the ship: ");
-            input[1] = scanner.next();
+            input[1] = scanner.readLine();
             System.out.println();
             if(validPlacement(input[0],input[1],ships[index])){
                 placeShip(input[0],input[1],ships[index]);
                 index++;
             } else {
-                System.out.println("The ship placement is not valid, please try again !");
-            } draw();
+                System.out.println("!!!! The ship placement is not valid, please try again !!!!");
+            } draw(attackBoard,defenseBoard);
         }
         return true;
     }
@@ -152,18 +152,27 @@ public class Board {
         }
     }
 
-    public void draw() {
-        for (int i = 0; i < board.length; i++){
+    public void draw(Board attackBoard, Board defenseBoard) {
+        System.out.print(" ### DEFENSE BOARD ###         ");
+        System.out.println("### ATTACK BOARD ###");
+        for (int i = 0; i < attackBoard.board.length; i++) {
             System.out.print(i + " ");
-            for (int j = 0; j < board.length; j++){
+            for (int j = 0; j < attackBoard.board.length; j++) {
                 System.out.print("|");
-                System.out.print(board[i][j]);
-            } System.out.print("|");
-            System.out.println();
-        } System.out.print("   ");
-        for(int i = 0; i < board.length; i++){
-            System.out.print(alphabet[i] + " ");
-        } System.out.println();
+                System.out.print(defenseBoard.board[i][j]);
+            }
+            System.out.print("|      ");
+            System.out.print(i + " ");
+            for (int j = 0; j < attackBoard.board.length; j++) {
+                System.out.print("|");
+                System.out.print(attackBoard.board[i][j]);
+            } System.out.println("|");
+        }
+        String endLine = "";
+        for(int i = 0; i < attackBoard.board.length; i++){
+            endLine += alphabetList.get(i) + " ";
+        }
+        System.out.println("   " + endLine + "         " + endLine);
     }
 
     public boolean shoot(String attack, Board attackBoard, Board defenseBoard){
@@ -172,7 +181,7 @@ public class Board {
 
         if(coordinate1 == -1 || coordinate2 > 9 || coordinate2 < 0) return false;
 
-        if(isValidAttack(attackBoard, attack)){
+        if(isValidAttack(attack)){
             if(attackBoard.board[coordinate1][coordinate2] == '-') {
                 attackBoard.board[coordinate1][coordinate2] = 'X';
                 defenseBoard.board[coordinate1][coordinate2] = 'X';

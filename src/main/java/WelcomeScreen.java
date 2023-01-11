@@ -10,15 +10,17 @@ public abstract class WelcomeScreen {
             String input = scanner.next();
             if(input.equals("0") || input.equals("1")){
                 return Integer.parseInt(input);
-            } System.out.println("Wrong input, please try again: ");
+            } System.out.println("!!! Wrong input, please try again. !!!");
         }
     }
 
     public static void battle(){
-        System.out.println("Both players have placed their ships, let the battle begin !");
-        System.out.println("To shoot write the coordinate of the square");
-        System.out.println("To see the boards write: update");
-        System.out.println("Host will begin shooting"); // Todo make it random
+        System.out.println("--- BOTH PLAYERS ARE READY TO PLAY ---");
+        System.out.println(" - SHOOT:       write the coordinate of the square");
+        System.out.println(" - SHOW BOARDS: write \"draw\"");
+        System.out.println(" - LEAVE:       write \"leave\"");
+        System.out.println();
+        System.out.println("### HOST STARTS ###");
     }
 
     public static String getName(){
