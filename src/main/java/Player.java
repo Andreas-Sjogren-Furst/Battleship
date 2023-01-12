@@ -31,9 +31,13 @@ public class Player {
 
                 //Put the lock for being ready
                 join.chatSpace.put("lockJoin");
+                join.boardSpace.put(join.name,"nameJoin");
+
+                // Get opponent name
+                Object[] opponentsName = join.boardSpace.get(new FormalField(String.class),new ActualField("nameHost"));
 
                 // Checks if game is over
-                startGameOver(join.boardSpace,join.name);
+                startGameOver(join.boardSpace,opponentsName[0].toString());
 
                 // Checks if join has left the game
                 startLeaveGame(join.boardSpace);
@@ -42,10 +46,10 @@ public class Player {
                 drawBoardInTerminal(join.chatSpace,join.attackBoard,join.defenseBoard,join.playerId);
 
                 // Receives shoot from host
-                startShootJoin(join);
+                startShootJoin(join, opponentsName[0].toString());
 
                 // Start thread for chatting host
-                Chat.startChat(join.chatSpace, join.boardSpace, playerName, join.attackBoard,join.playerId);
+                Chat.startChat(join.chatSpace, join.boardSpace, playerName, join.attackBoard,join.playerId, "p2", "p1");
 
             } else { // Hosting a game
 
@@ -60,9 +64,13 @@ public class Player {
 
                 //Put the lock for being ready
                 host.chatSpace.put("lockHost");
+                host.boardSpace.put(host.name,"nameHost");
+
+                // Get opponent name
+                Object[] opponentsName = host.boardSpace.get(new FormalField(String.class),new ActualField("nameJoin"));
 
                 // Checks if game is over
-                startGameOver(host.boardSpace,host.name);
+                startGameOver(host.boardSpace,opponentsName[0].toString());
 
                 // Checks if user has left the game
                 startLeaveGame(host.boardSpace);
@@ -71,32 +79,49 @@ public class Player {
                 drawBoardInTerminal(host.chatSpace,host.attackBoard,host.defenseBoard,host.playerId);
 
                 // Start thread to shooting in terminal
-                startShootHost(host);
+                startShootHost(host, opponentsName[0].toString());
 
                 // Start thread for chatting with join
-                Chat.startChat(host.chatSpace, host.boardSpace, playerName, host.attackBoard,host.playerId);
+                Chat.startChat(host.chatSpace, host.boardSpace, playerName, host.attackBoard,host.playerId, "p1", "p2");
             }
         }
     }
 
-    public static void startShootHost(Host host) throws InterruptedException {
+    public static void startShootHost(Host host, String joinName) throws InterruptedException {
+        new Thread(() -> {
+            try {
+                while(!gameOver){
+                        host.chatSpace.get(new ActualField("hostUpdate"));
+                        Object[] messageFromHost = host.chatSpace.get(new FormalField(String.class),new ActualField(host.opponentId), new ActualField(host.opponentId));
+                        host.defenseBoard.updateDefense(messageFromHost[0].toString());
+                        if(host.boardSpace.queryAll(new FormalField(String.class), new ActualField(host.name)).isEmpty()){
+                            host.boardSpace.put("gameOver",host.name);
+                            gameOver = true;
+                            host.defenseBoard.draw(host.attackBoard,host.defenseBoard);
+                            System.out.println("You lost the game :(");
+                        } else host.defenseBoard.draw(host.attackBoard,host.defenseBoard);
+
+                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }).start();
+
         new Thread(() -> {
             while(!gameOver){
                 try{
                     while(host.chatSpace.queryp(new ActualField("p1")) != null){
                         host.chatSpace.get(new ActualField("p1"));
                         Object[] messageFromChat = host.chatSpace.get(new FormalField(String.class), new ActualField(host.playerId), new ActualField(host.playerId));
-                        if(host.boardSpace.getp(new ActualField(messageFromChat[0]),new ActualField(host.name)) != null) {
+                        if(host.boardSpace.getp(new ActualField(messageFromChat[0]),new ActualField(joinName)) != null) {
                             host.attackBoard.updateAttack(messageFromChat[0].toString(), true);
                             host.chatSpace.put("p1");
                         } else {
                             host.attackBoard.updateAttack(messageFromChat[0].toString(),false);
                             host.chatSpace.put("p2");
-                        }
+                        } host.chatSpace.put("joinUpdate");
                         host.attackBoard.draw(host.attackBoard,host.defenseBoard);
                     }
-                    Object[] messageFromHost = host.chatSpace.get(new FormalField(String.class),new ActualField(host.opponentId), new ActualField(host.opponentId));
-                    host.defenseBoard.updateDefense(messageFromHost[0].toString());
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -104,25 +129,40 @@ public class Player {
         }).start();
     }
 
-    public static void startShootJoin(Join join){
+    public static void startShootJoin(Join join, String hostName){
+
+        new Thread(() -> {
+            try {
+                while(!gameOver){
+                        join.chatSpace.get(new ActualField("joinUpdate"));
+                        Object[] messageFromHost = join.chatSpace.get(new FormalField(String.class),new ActualField(join.opponentId), new ActualField(join.opponentId));
+                        join.defenseBoard.updateDefense(messageFromHost[0].toString());
+                        if(join.boardSpace.queryAll(new FormalField(String.class), new ActualField(join.name)).isEmpty()){
+                            join.boardSpace.put("gameOver",join.name);
+                            gameOver = true;
+                            join.defenseBoard.draw(join.attackBoard,join.defenseBoard);
+                            System.out.println("You lost the game :(");
+                         } else join.defenseBoard.draw(join.attackBoard,join.defenseBoard);
+                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }).start();
 
         new Thread(() -> { // For Sending attacks
             try{
                 while(!gameOver){
-                    Object[] messageFromHost = join.chatSpace.get(new FormalField(String.class),new ActualField(join.opponentId), new ActualField(join.opponentId));
-                    join.defenseBoard.updateDefense(messageFromHost[0].toString());
-
                     while(join.chatSpace.queryp(new ActualField("p2")) != null){
                         join.chatSpace.get(new ActualField("p2"));
                         Object[] messageFromChat = join.chatSpace.get(new FormalField(String.class), new ActualField(join.playerId), new ActualField(join.playerId));
 
-                        if(join.boardSpace.getp(new ActualField(messageFromChat[0]),new ActualField(join.name)) != null) {
+                        if(join.boardSpace.getp(new ActualField(messageFromChat[0]),new ActualField(hostName)) != null) {
                             join.attackBoard.updateAttack(messageFromChat[0].toString(), true);
                             join.chatSpace.put("p2");
                         } else {
                             join.attackBoard.updateAttack(messageFromChat[0].toString(),false);
                             join.chatSpace.put("p1");
-                        }
+                        } join.chatSpace.put("hostUpdate");
                         join.attackBoard.draw(join.attackBoard,join.defenseBoard);
                     }
 
@@ -157,21 +197,13 @@ public class Player {
         }
     }
 
-    public static void startGameOver(Space boardSpace, String name) {
+    public static void startGameOver(Space boardSpace, String opponentsName) {
         new Thread(() -> {
             while (!gameOver) {
                 try {
-                    List<Object[]> t = boardSpace.queryAll(new FormalField(String.class), new ActualField(name));
-                    if (t.isEmpty()){
-                        boardSpace.put("gameOver");
-                        gameOver = true;
-                        System.out.println("Congratulations you won the game :)");
-                        break;
-                    } else if(boardSpace.queryp(new ActualField("gameOver")) != null){
-                        gameOver = true;
-                        System.out.println("You lost the game :(");
-                        break;
-                    }
+                    boardSpace.get(new ActualField("gameOver"), new ActualField(opponentsName));
+                    gameOver = true;
+                    System.out.println("Congratulations you won the game :)");
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

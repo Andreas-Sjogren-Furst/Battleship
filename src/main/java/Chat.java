@@ -8,7 +8,7 @@ import java.util.Scanner;
 
 public abstract class Chat {
 
-    public static void startChat(Space chatSpace, Space boardSpace, String name, Board attackBoard, int playerId) throws IOException, InterruptedException {
+    public static void startChat(Space chatSpace, Space boardSpace, String name, Board attackBoard, int playerId, String lock1, String lock2) throws IOException, InterruptedException {
         chatSpace.query(new ActualField("lockHost"));
         chatSpace.query(new ActualField("lockJoin"));
         WelcomeScreen.battle();
@@ -37,7 +37,7 @@ public abstract class Chat {
             }
             else if (message.equals("draw")) {
                 chatSpace.put("draw", playerId);
-            } else if(attackBoard.isValidAttack(message) && !Player.gameOver){
+            } else if(attackBoard.isValidAttack(message) && !Player.gameOver && chatSpace.queryp(new ActualField(lock1)) == null && chatSpace.queryp(new ActualField(lock2)) == null){
                 // Host attacks Join
                 chatSpace.put(message,playerId,playerId);
                 chatSpace.put(message,playerId,playerId);
