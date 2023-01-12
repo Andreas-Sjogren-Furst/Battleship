@@ -14,6 +14,7 @@ public class Player {
     public static String input;
 
     public static void main(String[] argv) throws InterruptedException, IOException, URISyntaxException {
+        Login.begin();
         while(true){
             if (WelcomeScreen.begin() == 1){ // Joining a game
 
@@ -49,7 +50,7 @@ public class Player {
                 startShootJoin(join, opponentsName[0].toString());
 
                 // Start thread for chatting host
-                Chat.startChat(join.chatSpace, join.boardSpace, playerName, join.attackBoard,join.playerId, "p2", "p1");
+                Chat.startChat(join.chatSpace, join.boardSpace, playerName, join.attackBoard,join.playerId,"joinCanShoot");
 
             } else { // Hosting a game
 
@@ -82,7 +83,7 @@ public class Player {
                 startShootHost(host, opponentsName[0].toString());
 
                 // Start thread for chatting with join
-                Chat.startChat(host.chatSpace, host.boardSpace, playerName, host.attackBoard,host.playerId, "p1", "p2");
+                Chat.startChat(host.chatSpace, host.boardSpace, playerName, host.attackBoard,host.playerId, "hostCanShoot");
             }
         }
     }
@@ -112,6 +113,7 @@ public class Player {
                 try{
                     while(host.chatSpace.queryp(new ActualField("p1")) != null){
                         host.chatSpace.get(new ActualField("p1"));
+                        host.chatSpace.put("hostCanShoot");
                         Object[] messageFromChat = host.chatSpace.get(new FormalField(String.class), new ActualField(host.playerId), new ActualField(host.playerId));
                         if(host.boardSpace.getp(new ActualField(messageFromChat[0]),new ActualField(joinName)) != null) {
                             host.attackBoard.updateAttack(messageFromChat[0].toString(), true);
@@ -121,6 +123,7 @@ public class Player {
                             host.chatSpace.put("p2");
                         } host.chatSpace.put("joinUpdate");
                         host.attackBoard.draw(host.attackBoard,host.defenseBoard);
+                        host.chatSpace.get(new ActualField("hostCanShoot"));
                     }
                 } catch (InterruptedException e) {
                     e.printStackTrace();
@@ -154,8 +157,8 @@ public class Player {
                 while(!gameOver){
                     while(join.chatSpace.queryp(new ActualField("p2")) != null){
                         join.chatSpace.get(new ActualField("p2"));
+                        join.chatSpace.put("joinCanShoot");
                         Object[] messageFromChat = join.chatSpace.get(new FormalField(String.class), new ActualField(join.playerId), new ActualField(join.playerId));
-
                         if(join.boardSpace.getp(new ActualField(messageFromChat[0]),new ActualField(hostName)) != null) {
                             join.attackBoard.updateAttack(messageFromChat[0].toString(), true);
                             join.chatSpace.put("p2");
@@ -164,6 +167,7 @@ public class Player {
                             join.chatSpace.put("p1");
                         } join.chatSpace.put("hostUpdate");
                         join.attackBoard.draw(join.attackBoard,join.defenseBoard);
+                        join.chatSpace.get(new ActualField("joinCanShoot"));
                     }
 
                 }
