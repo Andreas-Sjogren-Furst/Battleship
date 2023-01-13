@@ -243,7 +243,7 @@ public class Player {
         for(Object[] host : hosts) System.out.println(host[2]);
         while(hostName == null) {
             System.out.print("ENTER HOST NAME: ");
-            input = scanner.readLine().toLowerCase();
+            input = scanner.readLine();
             hostName = join.chatSpace.getp(new FormalField(String.class), new FormalField(String.class), new ActualField(input));
             if(hostName == null) System.out.println("--- NO HOST WITH THAT NAME, TRY AGAIN: ---: ");
         } join.connect(hostName[0].toString(),hostName[1].toString());
