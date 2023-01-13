@@ -16,7 +16,7 @@ public abstract class Lobby {
     private static ArrayList<String> usernames = new ArrayList<>();
     private static ArrayList<String> passwords = new ArrayList<>();
 
-    private static final String uri = "tcp://127.0.0.1:9001/?keep";
+    private static final String uri = "tcp://10.209.121.213:9001/?keep";
     private static final SpaceRepository repository = new SpaceRepository();
     private static final SequentialSpace lobbySpace = new SequentialSpace();
     private static final SequentialSpace loginSpace = new SequentialSpace();
