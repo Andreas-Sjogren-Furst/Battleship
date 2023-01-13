@@ -35,7 +35,6 @@ public class Host {
     }
 
     private void connectToLobby() throws IOException, InterruptedException {
-        Scanner scanner = new Scanner(System.in);
         String lobbyUri = "tcp://10.209.121.213:9001/lobby?keep";
         System.out.println("Connecting to Lobby space at: " + lobbyUri + "...");
         System.out.println("Waiting for a player to join...");
