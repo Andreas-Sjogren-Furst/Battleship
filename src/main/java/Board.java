@@ -60,9 +60,6 @@ public class Board {
         // checks if valid coordinate
         if(x1 == -1 || y1 == -1 || x2 == -1 || y2 == -1) return false;
 
-        // Is coordinates outside the board
-        if((x1 >= board.length) || (x2 >= board.length) || (y1 >= board.length) ||(y2 >= board.length)) return false;
-        else if (x1 < 0 || x2 < 0 || y1 < 0 || y2 < 0) return false;
 
         // Check if ship is already placed on that position
         if(x1 == x2){
@@ -75,20 +72,19 @@ public class Board {
                 for(int i = y2; i <= y1; i++){
                     if(board[i][x1] == '-') return false;
                 }
-            }
-        } else if (y1 == y2){
-            if (Math.abs(x2-x1) != lengthShip - 1) return false;
-            if(x2 > x1){
-                for(int i = x1; i <= x2; i++){
-                    if(board[y1][i] == '-') return false;
+            } return true;
+        } else if (y1 == y2) {
+            if (Math.abs(x2 - x1) != lengthShip - 1) return false;
+            if (x2 > x1) {
+                for (int i = x1; i <= x2; i++) {
+                    if (board[y1][i] == '-') return false;
                 }
-            }
-        } else {
-            for(int i = x2; i <= x1; i++){
-                if(board[y1][i] == '-') return false;
-            }
-        }
-        return true;
+            } else {
+                for (int i = x2; i <= x1; i++) {
+                    if (board[y1][i] == '-') return false;
+                }
+            } return true;
+        } return false;
     }
 
     public boolean placeAllShips(Board attackBoard, Board defenseBoard) throws IOException {
@@ -97,8 +93,8 @@ public class Board {
         while (scanner.ready()) {
             scanner.readLine();
         }
-        //int[] ships = {2,3,3,4,5};
-        int[] ships = {2};
+        int[] ships = {2,3,3,4,5};
+        //int[] ships = {2};
         System.out.println("## Are you ready to place ships? ##");
         System.out.println(" --- When placing your ships, write the two end coordinates of the ship ---");
         int index = 0;

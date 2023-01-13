@@ -7,14 +7,10 @@ import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Scanner;
 public class Player {
-
     public static boolean gameOver = false;
-    public static Scanner scanner = new Scanner(System.in);
-    public static String playerName = WelcomeScreen.getName();
-    public static String input;
-
+    private static String input;
     public static void main(String[] argv) throws InterruptedException, IOException, URISyntaxException {
-        Login.begin();
+        String playerName = Login.begin();
         while(true){
             if (WelcomeScreen.begin() == 1){ // Joining a game
 
