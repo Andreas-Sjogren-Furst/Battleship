@@ -8,10 +8,10 @@ import java.util.Scanner;
 
 public abstract class Chat {
 
-    public static void startChat(Space chatSpace, Space boardSpace, String name, Board attackBoard, int playerId,String whichTurn) throws IOException, InterruptedException {
+    public static void startChat(Space chatSpace, Space boardSpace, String name, Board attackBoard, int playerId,String whichTurn, String playerName) throws IOException, InterruptedException {
         chatSpace.query(new ActualField("lockHost"));
         chatSpace.query(new ActualField("lockJoin"));
-        WelcomeScreen.battle();
+        WelcomeScreen.battle(playerName);
         BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
         while (input.ready()) {
             input.readLine();
@@ -39,8 +39,8 @@ public abstract class Chat {
                 chatSpace.put("draw", playerId);
             } else if(attackBoard.isValidAttack(message) && !Player.gameOver && chatSpace.queryp(new ActualField(whichTurn)) != null){
                 // Host attacks Join
-                chatSpace.put(message,playerId,playerId);
-                chatSpace.put(message,playerId,playerId);
+                chatSpace.put(message,playerId,"toJoin");
+                chatSpace.put(message,playerId,"toHost");
             } else chatSpace.put(name, message);
         }
     }

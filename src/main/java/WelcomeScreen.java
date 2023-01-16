@@ -14,13 +14,13 @@ public abstract class WelcomeScreen {
         }
     }
 
-    public static void battle(){
+    public static void battle(String playerName){
         System.out.println("--- BOTH PLAYERS ARE READY TO PLAY ---");
         System.out.println(" - SHOOT:       write the coordinate of the square");
         System.out.println(" - SHOW BOARDS: write \"draw\"");
         System.out.println(" - LEAVE:       write \"leave\"");
         System.out.println();
-        System.out.println("### HOST STARTS ###");
+        System.out.println("### " + playerName + " TURN ###");
     }
 
     public static String getName(){

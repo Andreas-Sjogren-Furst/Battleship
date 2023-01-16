@@ -30,11 +30,16 @@ public class Board {
         else return false;
     }
 
-    public void updateDefense(String attack){
+    public boolean updateDefense(String attack){
         int x = alphabetList.indexOf(attack.split("")[0]);
         int y = integersList.indexOf(attack.split("")[1]);
-        if(board[y][x] == '-') board[y][x] = 'X';
-        else board[y][x] = 'O';
+        if(board[y][x] == '-'){
+            board[y][x] = 'X';
+            return true;
+        } else {
+            board[y][x] = 'O';
+            return false;
+        }
     }
 
     public void updateAttack(String attack, boolean hit){
@@ -93,8 +98,8 @@ public class Board {
         while (scanner.ready()) {
             scanner.readLine();
         }
-        int[] ships = {2,3,3,4,5};
-        //int[] ships = {2};
+        //int[] ships = {2,3,3,4,5};
+        int[] ships = {2};
         System.out.println("## Are you ready to place ships? ##");
         System.out.println(" --- When placing your ships, write the two end coordinates of the ship ---");
         int index = 0;
@@ -113,6 +118,7 @@ public class Board {
                 System.out.println("!!!! The ship placement is not valid, please try again !!!!");
             } draw(attackBoard,defenseBoard);
         }
+        System.out.println("Waiting for the other player to place their ships...");
         return true;
     }
 

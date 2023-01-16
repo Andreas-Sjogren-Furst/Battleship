@@ -16,7 +16,7 @@ public class Host {
     SequentialSpace chatSpace = new SequentialSpace();
     SequentialSpace boardSpace = new SequentialSpace();
     RemoteSpace lobbySpace;
-    URI myUri = new URI("tcp://" + getIpAddress() + ":9002/?keep");
+    URI myUri = new URI("tcp://127.0.0.1:9002/?keep");
     String name;
 
     int playerId = 1;
@@ -35,7 +35,7 @@ public class Host {
     }
 
     private void connectToLobby() throws IOException, InterruptedException {
-        String lobbyUri = "tcp://10.209.121.213:9001/lobby?keep";
+        String lobbyUri = "tcp://127.0.0.1:9001/lobby?keep";
         System.out.println("Connecting to Lobby space at: " + lobbyUri + "...");
         System.out.println("Waiting for a player to join...");
         lobbySpace = new RemoteSpace(lobbyUri);
