@@ -133,11 +133,11 @@ public class Board {
 
         // x and y for positions for coordinate 1
         int x1 = alphabetList.indexOf(coordinate1.split("")[0]);
-        int y1 = Integer.parseInt(coordinate1.split("")[1]);
+        int y1 = integersList.indexOf(coordinate1.split("")[1]);
 
         // x and y positions for coordinate 2
         int x2 = alphabetList.indexOf(coordinate2.split("")[0]);
-        int y2 = Integer.parseInt(coordinate2.split("")[1]);
+        int y2 = integersList.indexOf(coordinate2.split("")[1]);
 
         if(x1 == x2){
             if(y2 > y1){
@@ -218,7 +218,7 @@ public class Board {
                 }
             } else {
                 for(int i = x2; i <= x1; i++){
-                    if(boardSpace.queryp(new ActualField(alphabetList.get(y1)+i), new ActualField(name)) != null){
+                    if(boardSpace.queryp(new ActualField(alphabetList.get(y1) + i), new ActualField(name)) != null){
                         return false;
                     }
                 }
