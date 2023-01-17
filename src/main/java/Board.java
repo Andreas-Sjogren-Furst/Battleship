@@ -212,13 +212,13 @@ public class Board {
         } else {
             if(x2 > x1){
                 for(int i = x1; i <= x2; i++){
-                    if(boardSpace.queryp(new ActualField(alphabetList.get(y1) + i), new ActualField(name)) != null){
+                    if(boardSpace.queryp(new ActualField(alphabetList.get(i) + y1), new ActualField(name)) != null){
                         return false;
                     }
                 }
             } else {
                 for(int i = x2; i <= x1; i++){
-                    if(boardSpace.queryp(new ActualField(alphabetList.get(y1) + i), new ActualField(name)) != null){
+                    if(boardSpace.queryp(new ActualField(alphabetList.get(i) + y1), new ActualField(name)) != null){
                         return false;
                     }
                 }

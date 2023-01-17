@@ -229,7 +229,7 @@ public class Player {
         for(int i = 0; i < defenseBoard.board.length; i++){
             for(int j = 0; j < defenseBoard.board.length; j++){
                 if(defenseBoard.board[i][j] == '-'){
-                    boardSpace.put(defenseBoard.alphabetList.get(j).toString() + i,name);
+                    boardSpace.put(defenseBoard.alphabetList.get(j) + i,name);
                 }
             }
         } boardSpace.put(defenseBoard.ships, name, name);
