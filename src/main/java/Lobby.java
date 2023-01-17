@@ -3,8 +3,10 @@ import org.jspace.FormalField;
 import org.jspace.SequentialSpace;
 import org.jspace.SpaceRepository;
 
+import java.net.SocketException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,13 +18,13 @@ public abstract class Lobby {
     private static ArrayList<String> usernames = new ArrayList<>();
     private static ArrayList<String> passwords = new ArrayList<>();
 
-    private static final String uri = "tcp://127.0.0.1:9001/?keep";
     private static final SpaceRepository repository = new SpaceRepository();
     private static final SequentialSpace lobbySpace = new SequentialSpace();
     private static final SequentialSpace loginSpace = new SequentialSpace();
 
-    public static void main(String[] args) throws InterruptedException, URISyntaxException {
+    public static void main(String[] args) throws InterruptedException, URISyntaxException, SocketException, UnknownHostException {
         // Open a gate
+        String uri = "tcp://" + Host.getIpAddress() + ":9001/?keep";
         myUri = new URI(uri);
         String gateUri = "tcp://" + myUri.getHost() + ":" + myUri.getPort() +  "/?keep" ;
         System.out.println("Opening Lobby repository gate at: " + gateUri + "...");

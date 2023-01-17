@@ -22,10 +22,4 @@ public abstract class WelcomeScreen {
         System.out.println();
         System.out.println("### " + playerName + " TURN ###");
     }
-
-    public static String getName(){
-        Scanner scanner = new Scanner(System.in);
-        System.out.print("Please enter your name: ");
-        return scanner.next().toLowerCase();
-    }
 }
