@@ -50,7 +50,7 @@ public abstract class Login {
     }
 
     private static void connectToSpace() throws IOException {
-        String loginURI = "tcp://10.209.121.213:9001/login?keep";
+        String loginURI = "tcp://10.209.121.213:9001/login?keep"; // Change to lobby ip address here
         loginSpace = new RemoteSpace(loginURI);
     }
 
