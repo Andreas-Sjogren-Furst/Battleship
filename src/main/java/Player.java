@@ -3,17 +3,17 @@ import org.jspace.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.reflect.Array;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 public class Player {
-
     public static boolean gameOver = false;
-    public static Scanner scanner = new Scanner(System.in);
-    public static String playerName = WelcomeScreen.getName();
-    public static String input;
-
+    private static String input;
     public static void main(String[] argv) throws InterruptedException, IOException, URISyntaxException {
+        String playerName = Login.begin();
         while(true){
             if (WelcomeScreen.begin() == 1){ // Joining a game
 
@@ -31,9 +31,13 @@ public class Player {
 
                 //Put the lock for being ready
                 join.chatSpace.put("lockJoin");
+                join.boardSpace.put(join.name,"nameJoin");
+
+                // Get opponent name and defense board
+                Object[] opponentsName = join.boardSpace.get(new FormalField(String.class),new ActualField("nameHost"));
 
                 // Checks if game is over
-                startGameOver(join.boardSpace,join.name);
+                startGameOver(join.boardSpace,opponentsName[0].toString());
 
                 // Checks if join has left the game
                 startLeaveGame(join.boardSpace);
@@ -42,10 +46,10 @@ public class Player {
                 drawBoardInTerminal(join.chatSpace,join.attackBoard,join.defenseBoard,join.playerId);
 
                 // Receives shoot from host
-                startShootJoin(join);
+                startShootJoin(join, opponentsName[0].toString());
 
                 // Start thread for chatting host
-                Chat.startChat(join.chatSpace, join.boardSpace, playerName, join.attackBoard,join.playerId);
+                Chat.startChat(join.chatSpace, join.boardSpace, playerName, join.attackBoard,join.playerId,"joinCanShoot", opponentsName[0].toString());
 
             } else { // Hosting a game
 
@@ -60,9 +64,13 @@ public class Player {
 
                 //Put the lock for being ready
                 host.chatSpace.put("lockHost");
+                host.boardSpace.put(host.name,"nameHost");
+
+                // Get opponent name and board
+                Object[] opponentsName = host.boardSpace.get(new FormalField(String.class),new ActualField("nameJoin"));
 
                 // Checks if game is over
-                startGameOver(host.boardSpace,host.name);
+                startGameOver(host.boardSpace,opponentsName[0].toString());
 
                 // Checks if user has left the game
                 startLeaveGame(host.boardSpace);
@@ -71,32 +79,69 @@ public class Player {
                 drawBoardInTerminal(host.chatSpace,host.attackBoard,host.defenseBoard,host.playerId);
 
                 // Start thread to shooting in terminal
-                startShootHost(host);
+                startShootHost(host, opponentsName[0].toString());
 
                 // Start thread for chatting with join
-                Chat.startChat(host.chatSpace, host.boardSpace, playerName, host.attackBoard,host.playerId);
+                Chat.startChat(host.chatSpace, host.boardSpace, playerName, host.attackBoard,host.playerId, "hostCanShoot", host.name);
             }
         }
     }
 
-    public static void startShootHost(Host host) throws InterruptedException {
-        new Thread(() -> {
+    public static void startShootHost(Host host, String joinName) throws InterruptedException {
+        Ship[] opponentShips = (Ship[]) host.boardSpace.get(new FormalField(Ship[].class), new ActualField(joinName), new ActualField(joinName))[0];
+        new Thread(() -> { // Receiving shoots from join
+            try {
+                while(!gameOver){
+                        host.chatSpace.get(new ActualField("hostUpdate"));
+                        Object[] messageFromHost = host.chatSpace.get(new FormalField(String.class),new ActualField(host.opponentId), new ActualField("toHost"));
+                        boolean whichTurn = host.defenseBoard.updateDefense(messageFromHost[0].toString());
+                        for(Ship ship : host.defenseBoard.ships){
+                            if(host.defenseBoard.isShipSunk(host.boardSpace, host.name, ship)){
+                                ship.isHit = true;
+                                host.defenseBoard.updateShipSunk(ship);
+                            }
+                        }
+                        if(host.boardSpace.queryAll(new FormalField(String.class), new ActualField(host.name)).isEmpty()){
+                            host.boardSpace.put("gameOver",host.name);
+                            gameOver = true;
+                            host.defenseBoard.draw(host.attackBoard,host.defenseBoard);
+                            System.out.println("You lost the game :(");
+                        } else{
+                            host.defenseBoard.draw(host.attackBoard,host.defenseBoard);
+                            if(whichTurn) System.out.println("### " + joinName + " TURN ###");
+                            else System.out.println("### " + host.name + " TURN ###");
+                        }
+                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }).start();
+
+        new Thread(() -> { // Sending shoots to join
             while(!gameOver){
                 try{
-                    while(host.chatSpace.queryp(new ActualField("p1")) != null){
-                        host.chatSpace.get(new ActualField("p1"));
-                        Object[] messageFromChat = host.chatSpace.get(new FormalField(String.class), new ActualField(host.playerId), new ActualField(host.playerId));
-                        if(host.boardSpace.getp(new ActualField(messageFromChat[0]),new ActualField(host.name)) != null) {
-                            host.attackBoard.updateAttack(messageFromChat[0].toString(), true);
-                            host.chatSpace.put("p1");
-                        } else {
-                            host.attackBoard.updateAttack(messageFromChat[0].toString(),false);
-                            host.chatSpace.put("p2");
-                        }
-                        host.attackBoard.draw(host.attackBoard,host.defenseBoard);
+                    host.chatSpace.get(new ActualField("p1"));
+                    host.chatSpace.put("hostCanShoot");
+                    Object[] messageFromChat = host.chatSpace.get(new FormalField(String.class), new ActualField(host.playerId), new ActualField("toHost"));
+                    boolean whichTurn = host.boardSpace.getp(new ActualField(messageFromChat[0]),new ActualField(joinName)) != null;
+                    if(whichTurn) {
+                        host.attackBoard.updateAttack(messageFromChat[0].toString(), true);
+                        host.chatSpace.put("p1");
+                    } else {
+                        host.attackBoard.updateAttack(messageFromChat[0].toString(),false);
+                        host.chatSpace.put("p2");
+                    } host.chatSpace.put("joinUpdate");
+
+                    for(Ship ship : opponentShips){
+                            if(host.attackBoard.isShipSunk(host.boardSpace, joinName, ship)){
+                                ship.isHit = true;
+                                host.attackBoard.updateShipSunk(ship);
+                            }
                     }
-                    Object[] messageFromHost = host.chatSpace.get(new FormalField(String.class),new ActualField(host.opponentId), new ActualField(host.opponentId));
-                    host.defenseBoard.updateDefense(messageFromHost[0].toString());
+                    host.attackBoard.draw(host.attackBoard,host.defenseBoard);
+                    if(whichTurn) System.out.println("### " + host.name + " TURN ###");
+                    else System.out.println("### " + joinName + " TURN ###");
+                    host.chatSpace.get(new ActualField("hostCanShoot"));
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -104,29 +149,61 @@ public class Player {
         }).start();
     }
 
-    public static void startShootJoin(Join join){
+    public static void startShootJoin(Join join, String hostName) throws InterruptedException {
+        Ship[] opponentsShips = (Ship[]) join.boardSpace.get(new FormalField(Ship[].class), new ActualField(hostName), new ActualField(hostName))[0];
+        new Thread(() -> { // Receiving shoots from host
+            try {
+                while(!gameOver){
+                        join.chatSpace.get(new ActualField("joinUpdate"));
+                        Object[] messageFromHost = join.chatSpace.get(new FormalField(String.class),new ActualField(join.opponentId), new ActualField("toJoin"));
+                        boolean whichTurn = join.defenseBoard.updateDefense(messageFromHost[0].toString());
+                        for(Ship ship : join.defenseBoard.ships){
+                            if(join.defenseBoard.isShipSunk(join.boardSpace, join.name, ship) && !ship.isHit){
+                            ship.isHit = true;
+                            join.defenseBoard.updateShipSunk(ship);
+                            }
+                        }
+                        if(join.boardSpace.queryAll(new FormalField(String.class), new ActualField(join.name)).isEmpty()){
+                            join.boardSpace.put("gameOver",join.name);
+                            gameOver = true;
+                            join.defenseBoard.draw(join.attackBoard,join.defenseBoard);
+                            System.out.println("You lost the game :(");
+                         } else {
+                            join.defenseBoard.draw(join.attackBoard,join.defenseBoard);
+                            if(whichTurn) System.out.println("### " + hostName + " TURN ###");
+                            else System.out.println("### " + join.name + " TURN ###");
+                        }
+                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }).start();
 
-        new Thread(() -> { // For Sending attacks
+        new Thread(() -> { // For Sending attacks to host
             try{
                 while(!gameOver){
-                    Object[] messageFromHost = join.chatSpace.get(new FormalField(String.class),new ActualField(join.opponentId), new ActualField(join.opponentId));
-                    join.defenseBoard.updateDefense(messageFromHost[0].toString());
-
-                    while(join.chatSpace.queryp(new ActualField("p2")) != null){
                         join.chatSpace.get(new ActualField("p2"));
-                        Object[] messageFromChat = join.chatSpace.get(new FormalField(String.class), new ActualField(join.playerId), new ActualField(join.playerId));
-
-                        if(join.boardSpace.getp(new ActualField(messageFromChat[0]),new ActualField(join.name)) != null) {
+                        join.chatSpace.put("joinCanShoot");
+                        Object[] messageFromChat = join.chatSpace.get(new FormalField(String.class), new ActualField(join.playerId), new ActualField("toJoin"));
+                        boolean whichTurn = join.boardSpace.getp(new ActualField(messageFromChat[0]),new ActualField(hostName)) != null;
+                        if(whichTurn) {
                             join.attackBoard.updateAttack(messageFromChat[0].toString(), true);
                             join.chatSpace.put("p2");
                         } else {
                             join.attackBoard.updateAttack(messageFromChat[0].toString(),false);
                             join.chatSpace.put("p1");
+                        } join.chatSpace.put("hostUpdate");
+                        for(Ship ship : opponentsShips){
+                            if(join.attackBoard.isShipSunk(join.boardSpace, hostName, ship)){
+                                join.attackBoard.updateShipSunk(ship);
+                                ship.isHit = true;
+                            }
                         }
                         join.attackBoard.draw(join.attackBoard,join.defenseBoard);
+                        if(whichTurn) System.out.println("### " + join.name + " TURN ###");
+                        else System.out.println("### " + hostName + " TURN ###");
+                        join.chatSpace.get(new ActualField("joinCanShoot"));
                     }
-
-                }
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -148,30 +225,24 @@ public class Player {
     }
 
     public static void uploadShips(Space boardSpace, Board defenseBoard, String name) throws InterruptedException {
+        // upload ships coordinates to board space
         for(int i = 0; i < defenseBoard.board.length; i++){
             for(int j = 0; j < defenseBoard.board.length; j++){
                 if(defenseBoard.board[i][j] == '-'){
-                    boardSpace.put(defenseBoard.alphabetList.get(j).toString() + i,name);
+                    boardSpace.put(defenseBoard.alphabetList.get(j) + i,name);
                 }
             }
-        }
+        } boardSpace.put(defenseBoard.ships, name, name);
     }
 
-    public static void startGameOver(Space boardSpace, String name) {
+    public static void startGameOver(Space boardSpace, String opponentsName) {
         new Thread(() -> {
             while (!gameOver) {
                 try {
-                    List<Object[]> t = boardSpace.queryAll(new FormalField(String.class), new ActualField(name));
-                    if (t.isEmpty()){
-                        boardSpace.put("gameOver");
-                        gameOver = true;
-                        System.out.println("Congratulations you won the game :)");
-                        break;
-                    } else if(boardSpace.queryp(new ActualField("gameOver")) != null){
-                        gameOver = true;
-                        System.out.println("You lost the game :(");
-                        break;
-                    }
+                    boardSpace.get(new ActualField("gameOver"), new ActualField(opponentsName));
+                    gameOver = true;
+                    Thread.sleep(100);
+                    System.out.println("Congratulations you won the game :)");
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -193,6 +264,7 @@ public class Player {
         }).start();
     }
     public static int joinHost(Join join) throws InterruptedException, IOException {
+        // Connects host and join
         BufferedReader scanner = new BufferedReader(new InputStreamReader(System.in));
         while (scanner.ready()) {
             scanner.readLine();
@@ -211,7 +283,7 @@ public class Player {
         for(Object[] host : hosts) System.out.println(host[2]);
         while(hostName == null) {
             System.out.print("ENTER HOST NAME: ");
-            input = scanner.readLine().toLowerCase();
+            input = scanner.readLine();
             hostName = join.chatSpace.getp(new FormalField(String.class), new FormalField(String.class), new ActualField(input));
             if(hostName == null) System.out.println("--- NO HOST WITH THAT NAME, TRY AGAIN: ---: ");
         } join.connect(hostName[0].toString(),hostName[1].toString());

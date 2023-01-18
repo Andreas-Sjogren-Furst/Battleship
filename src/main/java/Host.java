@@ -16,7 +16,7 @@ public class Host {
     SequentialSpace chatSpace = new SequentialSpace();
     SequentialSpace boardSpace = new SequentialSpace();
     RemoteSpace lobbySpace;
-    URI myUri = new URI("tcp://127.0.0.1:9002/?keep");
+    URI myUri = new URI("tcp://" + getIpAddress() + ":9002/?keep");
     String name;
 
     int playerId = 1;
@@ -35,21 +35,16 @@ public class Host {
     }
 
     private void connectToLobby() throws IOException, InterruptedException {
-        Scanner scanner = new Scanner(System.in);
-        String lobbyUri = "tcp://127.0.0.1:9001/lobby?keep";
+        String lobbyUri = "tcp://10.209.121.213:9001/lobby?keep";
         System.out.println("Connecting to Lobby space at: " + lobbyUri + "...");
         System.out.println("Waiting for a player to join...");
         lobbySpace = new RemoteSpace(lobbyUri);
-        while(lobbySpace.queryp(new FormalField(String.class), new FormalField(String.class), new ActualField(name)) != null){
-            System.out.println("!!! Host name is already taken !!!");
-            System.out.print("Enter New Host Name: ");
-            name = scanner.next().toLowerCase();
-        } lobbySpace.put(myUri.getHost() + ":" + myUri.getPort(), name, name);
+        lobbySpace.put(myUri.getHost() + ":" + myUri.getPort(), name, name);
         Object[] t = chatSpace.query(new FormalField(String.class), new ActualField(-1));
         System.out.println(t[0] + " has joined the game");
     }
 
-    private void openGate() throws URISyntaxException, InterruptedException {
+    private void openGate() throws InterruptedException {
         String gateUri = "tcp://" + myUri.getHost() + ":" + myUri.getPort() + "/?keep";
         System.out.println("Opening host repository gate at: " + gateUri + "...");
         repository.addGate(gateUri);
@@ -58,17 +53,8 @@ public class Host {
         chatSpace.put("p1");
     }
 
-    private String getIpAddress() throws SocketException {
-        String ip = "";
-        Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
-        while (interfaces.hasMoreElements()) {
-            NetworkInterface iface = interfaces.nextElement();
-            // filters out 127.0.0.1 and inactive interfaces
-            if (iface.isLoopback() || !iface.isUp()) continue;
-            Enumeration<InetAddress> addresses = iface.getInetAddresses();
-            InetAddress address = addresses.nextElement();
-            ip = address.getHostAddress();
-            System.out.println(iface.getDisplayName() + " " + ip);
-        } return ip;
-    }
+    public static String getIpAddress() throws UnknownHostException {
+            InetAddress ip = InetAddress.getLocalHost();
+            return ip.getHostAddress();
+        }
 }
