@@ -1,7 +1,0 @@
-Protocol:
-
-Host.(URI,spaceName,hostName) -> Lobby.playerNames(String,String,String)
-Lobby.(URI,spaceName,hostName) -> Join.hostnames(String,String,hostName)
-Lobby.(URI,spaceName,hostName) -> Join.hostname(String,String,hostName)
-while not valid(hostName?)@Join do
-    Lobby.(URI,spaceName,hostName) -> Join.hostname(String,String,hostName)
