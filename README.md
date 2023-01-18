@@ -8,7 +8,7 @@ Guide to play the game as LAN:
     4. Insert the lobby ip address on line 53 in the class Login.
     
     5. You first need to run the class Lobby, you can run it on a separate computer.
-    6. Then run the class Player, you can run it on a separate computer with the right lobby ip address.
+    6. Then run the class Player, you can run it on a separate computer, with the right lobby ip address.
     
     - Enjoy the game.
 
