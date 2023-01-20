@@ -41,8 +41,8 @@ public abstract class Lobby {
                 while(true){
                     Object[] loginCredentials = loginSpace.get(new FormalField(String.class), new FormalField(String.class));
                     if(usernames.contains(loginCredentials[0].toString()) && passwords.contains(loginCredentials[1].toString())){
-                        loginSpace.put(true);
-                    } loginSpace.put(false);
+                        loginSpace.put(true, loginCredentials[0].toString());
+                    } loginSpace.put(false, loginCredentials[0].toString());
                 }
             } catch (InterruptedException e) {
                 e.printStackTrace();
@@ -57,8 +57,8 @@ public abstract class Lobby {
                     if(!usernames.contains(loginCredentials[0].toString())){
                         usernames.add(loginCredentials[0].toString());
                         passwords.add(loginCredentials[1].toString());
-                        loginSpace.put(true, "createAccount");
-                    } else loginSpace.put(false, "createAccount");
+                        loginSpace.put(true, loginCredentials[0].toString(), "createAccount");
+                    } else loginSpace.put(false, loginCredentials[0].toString(), "createAccount");
                 }
             } catch (InterruptedException e) {
                 e.printStackTrace();

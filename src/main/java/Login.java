@@ -41,7 +41,7 @@ public abstract class Login {
             password = scanner.readLine();
             System.out.println("Logging in...");
             loginSpace.put(username,password);
-            Object[] isValidLogin = loginSpace.get(new FormalField(Boolean.class));
+            Object[] isValidLogin = loginSpace.get(new FormalField(Boolean.class), new ActualField(username));
             if((Boolean) isValidLogin[0]){
                 System.out.println("Login successfully");
                 return username;
@@ -73,7 +73,7 @@ public abstract class Login {
 
             System.out.println("Creating account...");
             loginSpace.put(username,password,"createAccount");
-            Object[] isValidCreateAccount = loginSpace.get(new FormalField(Boolean.class), new ActualField("createAccount"));
+            Object[] isValidCreateAccount = loginSpace.get(new FormalField(Boolean.class), new ActualField(username), new ActualField("createAccount"));
             if((Boolean)isValidCreateAccount[0]){
                 System.out.println("Account was created successfully :)");
                 return username;
