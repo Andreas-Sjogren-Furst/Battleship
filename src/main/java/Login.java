@@ -5,6 +5,7 @@ import org.jspace.RemoteSpace;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Locale;
 
 public abstract class Login {
 
@@ -41,7 +42,7 @@ public abstract class Login {
             password = scanner.readLine();
             System.out.println("Logging in...");
             loginSpace.put(username,password);
-            Object[] isValidLogin = loginSpace.get(new FormalField(Boolean.class), new ActualField(username));
+            Object[] isValidLogin = loginSpace.get(new FormalField(Boolean.class));
             if((Boolean) isValidLogin[0]){
                 System.out.println("Login successfully");
                 return username;
@@ -55,25 +56,21 @@ public abstract class Login {
     }
 
     private static String createUser() throws IOException, InterruptedException {
-        String username;
-        String password;
-        String passwordRedo;
         while(true){
             System.out.println("--- CREATE A USER ---");
             System.out.print("Username: ");
-            username = scanner.readLine();
+            String username = scanner.readLine();
             System.out.print("Password: ");
-            password = scanner.readLine();
+            String password = scanner.readLine();
             System.out.print("Write Password again: ");
-            passwordRedo = scanner.readLine();
+            String passwordRedo = scanner.readLine();
             if(!password.equals(passwordRedo)){
                 System.out.println("!!! Password does not match, please try again !!!");
                 continue;
             }
-
             System.out.println("Creating account...");
             loginSpace.put(username,password,"createAccount");
-            Object[] isValidCreateAccount = loginSpace.get(new FormalField(Boolean.class), new ActualField(username), new ActualField("createAccount"));
+            Object[] isValidCreateAccount = loginSpace.get(new FormalField(Boolean.class), new ActualField("createAccount"));
             if((Boolean)isValidCreateAccount[0]){
                 System.out.println("Account was created successfully :)");
                 return username;

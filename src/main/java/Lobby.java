@@ -57,8 +57,8 @@ public abstract class Lobby {
                     if(!usernames.contains(loginCredentials[0].toString())){
                         usernames.add(loginCredentials[0].toString());
                         passwords.add(loginCredentials[1].toString());
-                        loginSpace.put(true, loginCredentials[0].toString(), "createAccount");
-                    } else loginSpace.put(false, loginCredentials[0].toString(), "createAccount");
+                        loginSpace.put(true, "createAccount");
+                    } else loginSpace.put(false, "createAccount");
                 }
             } catch (InterruptedException e) {
                 e.printStackTrace();
