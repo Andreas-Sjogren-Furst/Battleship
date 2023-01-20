@@ -241,7 +241,7 @@ public class Player {
                 try {
                     boardSpace.get(new ActualField("gameOver"), new ActualField(opponentsName));
                     gameOver = true;
-                    Thread.sleep(100);
+                    Thread.sleep(300);
                     System.out.println("Congratulations you won the game :)");
                 } catch (InterruptedException e) {
                     e.printStackTrace();
