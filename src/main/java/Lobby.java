@@ -41,8 +41,8 @@ public abstract class Lobby {
                 while(true){
                     Object[] loginCredentials = loginSpace.get(new FormalField(String.class), new FormalField(String.class));
                     if(usernames.contains(loginCredentials[0].toString()) && passwords.contains(loginCredentials[1].toString())){
-                        loginSpace.put(true, loginCredentials[0].toString());
-                    } loginSpace.put(false, loginCredentials[0].toString());
+                        loginSpace.put(true);
+                    } loginSpace.put(false);
                 }
             } catch (InterruptedException e) {
                 e.printStackTrace();

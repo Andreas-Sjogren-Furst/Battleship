@@ -56,14 +56,17 @@ public abstract class Login {
     }
 
     private static String createUser() throws IOException, InterruptedException {
+        String username;
+        String password;
+        String passwordRedo;
         while(true){
             System.out.println("--- CREATE A USER ---");
             System.out.print("Username: ");
-            String username = scanner.readLine();
+            username = scanner.readLine();
             System.out.print("Password: ");
-            String password = scanner.readLine();
+            password = scanner.readLine();
             System.out.print("Write Password again: ");
-            String passwordRedo = scanner.readLine();
+            passwordRedo = scanner.readLine();
             if(!password.equals(passwordRedo)){
                 System.out.println("!!! Password does not match, please try again !!!");
                 continue;
